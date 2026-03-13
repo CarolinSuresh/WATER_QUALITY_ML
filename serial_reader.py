@@ -3,7 +3,7 @@
 import serial
 import requests
 
-PORT = "COM6"
+PORT = "COM5"
 BAUD = 115200
 
 ser = serial.Serial(PORT, BAUD, timeout=1)
