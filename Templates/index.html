@@ -1,22 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Water Quality Monitoring</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family: Arial;
+padding:40px;
+background:#f5f7fb;
+}
+
+.sensor-box{
+display:flex;
+gap:20px;
+margin-bottom:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:8px;
+box-shadow:0 0 5px rgba(0,0,0,0.1);
+width:150px;
+}
+
+.result{
+margin-top:20px;
+padding:20px;
+border-radius:10px;
+font-size:20px;
+}
+
+.safe{
+background:#e6fff0;
+border:2px solid green;
+}
+
+.unsafe{
+background:#ffe6e6;
+border:2px solid red;
+}
+
+.alert{
+background:#fff5e6;
+border:2px solid orange;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Water Quality Monitoring Dashboard</h1>
+
+<div class="sensor-box">
+
+<div class="card">
+pH
+<h3 id="ph">--</h3>
+</div>
+
+<div class="card">
+Turbidity
+<h3 id="turb">--</h3>
+</div>
+
+<div class="card">
+Temperature
+<h3 id="temp">--</h3>
+</div>
+
+<div class="card">
+DO
+<h3 id="do">--</h3>
+</div>
+
+<div class="card">
+BOD
+<h3 id="bod">--</h3>
+</div>
+
+</div>
+
+<div id="resultBox" class="result"></div>
+<div id="spikeBox" class="result alert"></div>
+<div id="predictionBox" class="result"></div>
+
+<br>
+
+<canvas id="chart" width="600" height="250"></canvas>
+
 <script>
-setInterval(async () => {
 
-  const res = await fetch("/latest");
-  const result = await res.json();
+const ctx = document.getElementById("chart").getContext("2d")
 
-  if(!result.result) return;
+let chart = new Chart(ctx,{
+type:"line",
+data:{
+labels:[],
+datasets:[{
+label:"Turbidity",
+data:[],
+borderColor:"blue",
+fill:false
+}]
+},
+options:{animation:false}
+})
 
-  const resultBox = document.getElementById("resultBox");
-  const alertBox = document.getElementById("alertBox");
-  const turbidityBox = document.getElementById("turbidityBox");
+function updateChart(value){
 
-  resultBox.textContent = result.result;
-  resultBox.className = "result-box " + (result.result.includes("Unsafe") ? "unsafe" : "safe");
+const time = new Date().toLocaleTimeString()
 
-  alertBox.textContent = result.sudden_change;
-  alertBox.className = "result-box alert";
+chart.data.labels.push(time)
+chart.data.datasets[0].data.push(value)
 
-  turbidityBox.textContent = "Predicted Turbidity: " + result.predicted_turbidity;
+if(chart.data.labels.length>10){
+chart.data.labels.shift()
+chart.data.datasets[0].data.shift()
+}
 
-}, 2000);
+chart.update()
+
+}
+
+setInterval(async()=>{
+
+const res = await fetch("/latest")
+const data = await res.json()
+
+if(!data.result) return
+
+document.getElementById("ph").textContent=data.ph
+document.getElementById("turb").textContent=data.turbidity
+document.getElementById("temp").textContent=data.temperature
+document.getElementById("do").textContent=data.do
+document.getElementById("bod").textContent=data.bod
+
+const resultBox=document.getElementById("resultBox")
+resultBox.textContent=data.result
+resultBox.className="result "+(data.result.includes("Unsafe")?"unsafe":"safe")
+
+document.getElementById("spikeBox").textContent=data.spike
+
+document.getElementById("predictionBox").textContent=
+"Predicted Turbidity: "+data.predicted_turbidity
+
+updateChart(data.turbidity)
+
+},2000)
+
 </script>
+
+</body>
+</html>
