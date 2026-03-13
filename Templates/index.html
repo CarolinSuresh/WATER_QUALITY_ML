@@ -1,20 +1,22 @@
+<script>
 setInterval(async () => {
 
-  const res = await fetch("/latest")
-  const result = await res.json()
+  const res = await fetch("/latest");
+  const result = await res.json();
 
-  if(!result.result) return
+  if(!result.result) return;
 
-  const resultBox = document.getElementById("resultBox")
-  const alertBox = document.getElementById("alertBox")
-  const turbidityBox = document.getElementById("turbidityBox")
+  const resultBox = document.getElementById("resultBox");
+  const alertBox = document.getElementById("alertBox");
+  const turbidityBox = document.getElementById("turbidityBox");
 
-  resultBox.textContent = result.result
-  resultBox.className = "result-box " + (result.result.includes("Unsafe") ? "unsafe" : "safe")
+  resultBox.textContent = result.result;
+  resultBox.className = "result-box " + (result.result.includes("Unsafe") ? "unsafe" : "safe");
 
-  alertBox.textContent = result.sudden_change
-  alertBox.className = "result-box alert"
+  alertBox.textContent = result.sudden_change;
+  alertBox.className = "result-box alert";
 
-  turbidityBox.textContent = "Predicted Turbidity: " + result.predicted_turbidity
+  turbidityBox.textContent = "Predicted Turbidity: " + result.predicted_turbidity;
 
-},2000)
+}, 2000);
+</script>
