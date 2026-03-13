@@ -28,6 +28,7 @@ def predict():
     temperature = data["Temperature (°C)"]
     do = data["DO (mg/L)"]
     bod = data["BOD (mg/L)"]
+    waterlevel = data["WaterLevel"]
 
     X = np.array([[ph, turbidity, temperature, do, bod]])
     X_scaled = scaler.transform(X)
@@ -52,6 +53,7 @@ def predict():
         "temperature": temperature,
         "do": do,
         "bod": bod,
+        "waterlevel": waterlevel,
         "result": result_text,
         "spike": spike,
         "predicted_turbidity": round(float(predicted_turbidity),3)

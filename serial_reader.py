@@ -16,26 +16,28 @@ while True:
         if line:
             print("SERIAL:", line)
 
-        # Parse TX format: Sent: x,x,x,x,x,x
+        # Parse TX format: Sent: ph,tds,turb,ammonia,temp,waterlevel
         if "Sent:" in line:
 
             data = line.split("Sent:")[1].strip()
             values = data.split(",")
 
-            if len(values) >= 5:
+            if len(values) >= 6:
 
                 ph = float(values[0])
+                bod = float(values[1])          # using TDS as BOD input
                 turb = float(values[2])
+                do = float(values[3])           # ammonia used as DO input
                 temp = float(values[4])
-                do = float(values[3])
-                bod = float(values[1])
+                waterlevel = float(values[5])
 
                 payload = {
                     "pH": ph,
                     "Turbidity (NTU)": turb,
                     "Temperature (°C)": temp,
                     "DO (mg/L)": do,
-                    "BOD (mg/L)": bod
+                    "BOD (mg/L)": bod,
+                    "WaterLevel": waterlevel
                 }
 
                 res = requests.post(
