@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Water Quality</title>
+  <style>
+    /* --- KEEP ALL YOUR STYLES AS IS --- */
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f8fc; padding: 40px 100px; }
+    h1 { font-size: 40px; color: #222; font-weight: 700; }
+    p { color: #444; margin-top: 4px; }
+    .form-row { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+    label { font-weight: 500; display: block; margin-bottom: 4px; }
+    input { width: 280px; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px; outline: none; }
+    input:focus { border-color: #007bff; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+    #checkBtn { background-color: #007bff; color: white; }
+    #resetBtn { background-color: #e9ecef; color: #333; margin-left: 10px; }
+    .result-box { margin-top: 30px; padding: 20px; border-radius: 12px; font-size: 20px; font-weight: 600; text-align: center; }
+    .safe { background-color: #e6fff0; border: 2px solid #2ecc71; color: #065f46; }
+    .unsafe { background-color: #ffe6e6; border: 2px solid #e74c3c; color: #7b241c; }
+    .alert { background-color: #fff6e6; border: 2px solid #ffb84d; color: #8b4513; }
+    .info { background-color: #e6f0ff; border: 2px solid #3498db; color: #1f3d7a; }
+  </style>
+</head>
+
+<body>
+  <h1>Water Quality</h1>
+  <p>Enter sensor values and click <strong>Check</strong>.</p>
+
+  <form id="waterForm">
+    <div class="form-row">
+      <div>
+        <label for="ph">pH</label>
+        <input type="number" step="0.1" id="ph" name="pH" value="7.1" required />
+      </div>
+      <div>
+        <label for="turbidity">Turbidity (NTU)</label>
+        <input type="number" step="0.1" id="turbidity" name="Turbidity (NTU)" value="6.5" required />
+      </div>
+      <div>
+        <label for="temperature">Temperature (°C)</label>
+        <input type="number" step="0.1" id="temperature" name="Temperature (°C)" value="25" required />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label for="dissolved_oxygen">DO (mg/L)</label>
+        <input type="number" step="0.1" id="dissolved_oxygen" name="DO (mg/L)" value="6.5" required />
+      </div>
+      <div>
+        <label for="conductivity">BOD (mg/L)</label>
+        <input type="number" step="0.1" id="conductivity" name="BOD (mg/L)" value="240" required />
+      </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <button type="submit" id="checkBtn">Check</button>
+      <button type="reset" id="resetBtn">Reset</button>
+    </div>
+  </form>
+
+  <div id="resultBox" class="result-box"></div>
+  <div id="alertBox" class="result-box"></div>
+  <div id="turbidityBox" class="result-box info"></div>
+
+  <script>
+    document.getElementById("waterForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Send data keys that match Flask app.py feature names
+      const data = {
+        "pH": parseFloat(document.getElementById("ph").value),
+        "Turbidity (NTU)": parseFloat(document.getElementById("turbidity").value),
+        "Temperature (°C)": parseFloat(document.getElementById("temperature").value),
+        "DO (mg/L)": parseFloat(document.getElementById("dissolved_oxygen").value),
+        "BOD (mg/L)": parseFloat(document.getElementById("conductivity").value),
+      };
+
+      const res = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      const resultBox = document.getElementById("resultBox");
+      const alertBox = document.getElementById("alertBox");
+      const turbidityBox = document.getElementById("turbidityBox");
+
+      // Result
+      resultBox.textContent = result.result;
+      resultBox.className = "result-box " + (result.result.includes("Unsafe") ? "unsafe" : "safe");
+
+      // Alert
+      alertBox.textContent = result.sudden_change;
+      alertBox.className = "result-box alert";
+
+      // Predicted Turbidity
+      turbidityBox.textContent = "Predicted Turbidity: " + result.predicted_turbidity;
+      turbidityBox.className = "result-box info";
+    });
+  </script>
+</body>
+</html>
