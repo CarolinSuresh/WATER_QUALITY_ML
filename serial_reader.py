@@ -1,3 +1,5 @@
+serial_ reader.py
+
 import serial
 import requests
 
@@ -22,15 +24,15 @@ while True:
             data = line.split("MLDATA:")[1].strip()
             values = data.split(",")
 
-            # RX now sends 6 parameters
-            if len(values) >= 6:
+            if len(values) >= 5:
 
                 ph = float(values[0])
                 turb = float(values[1])
                 temp = float(values[2])
-                do = float(values[3])
-                bod = float(values[4])
-                waterlevel = float(values[5])
+                do = float(values[3])   # MQ ammonia used as DO input
+                bod = float(values[4])  # TDS used as BOD input
+
+                waterlevel = 0   # RX doesn't send WL in MLDATA
 
                 payload = {
                     "pH": ph,

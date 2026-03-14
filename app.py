@@ -1,3 +1,5 @@
+app.py
+
 from flask import Flask, render_template, request, jsonify
 import joblib
 import numpy as np
@@ -29,25 +31,6 @@ def predict():
     do = data["DO (mg/L)"]
     bod = data["BOD (mg/L)"]
     waterlevel = data["WaterLevel"]
-
-    # -------- SKIP ML IF NO WATER --------
-    if waterlevel <= 2:
-
-        latest_result = {
-            "ph": ph,
-            "turbidity": turbidity,
-            "temperature": temperature,
-            "do": do,
-            "bod": bod,
-            "waterlevel": waterlevel,
-            "result": "No Water Detected",
-            "spike": "Container Empty",
-            "predicted_turbidity": 0
-        }
-
-        return jsonify(latest_result)
-
-    # -------- ML PREDICTION --------
 
     X = np.array([[ph, turbidity, temperature, do, bod]])
     X_scaled = scaler.transform(X)
