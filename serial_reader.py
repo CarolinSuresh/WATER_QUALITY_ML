@@ -1,5 +1,3 @@
-serial_ reader.py
-
 import serial
 import requests
 
