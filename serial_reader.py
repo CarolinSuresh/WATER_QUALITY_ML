@@ -1,43 +1,55 @@
 import serial
-import time
+import requests
 
 PORT = "COM5"
 BAUD = 115200
 
 ser = serial.Serial(PORT, BAUD, timeout=1)
-time.sleep(2)
 
-latest_data = {
-    "ph": 0,
-    "temperature": 0,
-    "turbidity": 0,
-    "tds": 0,
-    "water_level": 0,
-    "flow": 0
-}
+print("Reading LoRa data...\n")
 
-def read_serial():
-    global latest_data
+while True:
 
     try:
-        line = ser.readline().decode('utf-8').strip()
+        line = ser.readline().decode(errors='ignore').strip()
 
         if line:
             print("SERIAL:", line)
 
-            values = line.split(",")
+        # -------- READ MACHINE DATA FROM RX --------
+        if "MLDATA:" in line:
 
-            if len(values) == 6:
-                latest_data = {
-                    "ph": float(values[0]),
-                    "temperature": float(values[1]),
-                    "turbidity": float(values[2]),
-                    "tds": float(values[3]),
-                    "water_level": float(values[4]),
-                    "flow": float(values[5])
+            data = line.split("MLDATA:")[1].strip()
+            values = data.split(",")
+
+            if len(values) >= 5:
+
+                ph = float(values[0])
+                turb = float(values[1])
+                temp = float(values[2])
+                do = float(values[3])   # MQ ammonia used as DO input
+                bod = float(values[4])  # TDS used as BOD input
+
+                waterlevel = 0   # RX doesn't send WL in MLDATA
+
+                payload = {
+                    "pH": ph,
+                    "Turbidity (NTU)": turb,
+                    "Temperature (°C)": temp,
+                    "DO (mg/L)": do,
+                    "BOD (mg/L)": bod,
+                    "WaterLevel": waterlevel
                 }
 
-    except Exception as e:
-        print("Serial Error:", e)
+                print("Sending to ML:", payload)
 
-    return latest_data
+                res = requests.post(
+                    "http://127.0.0.1:5000/predict",
+                    json=payload
+                )
+
+                print("ML RESULT:", res.json())
+                print("---------------------------")
+
+    except Exception as e:
+        print("Error:", e)
