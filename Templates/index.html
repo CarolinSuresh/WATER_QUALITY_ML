@@ -2,167 +2,100 @@
 <html>
 
 <head>
+    <title>Water Quality Monitoring</title>
 
-<title>Water Quality Monitoring</title>
+    <style>
+        body{
+            font-family: Arial;
+            text-align:center;
+            background:#f4f4f4;
+        }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        .container{
+            margin-top:50px;
+        }
 
-<style>
+        .card{
+            display:inline-block;
+            background:white;
+            padding:20px;
+            margin:10px;
+            border-radius:10px;
+            width:150px;
+            box-shadow:0px 0px 10px rgba(0,0,0,0.1);
+        }
 
-body{
-font-family: Arial;
-padding:40px;
-background:#f5f7fb;
-}
+        h2{
+            margin:5px;
+        }
 
-.sensor-box{
-display:flex;
-gap:20px;
-margin-bottom:20px;
-flex-wrap:wrap;
-}
-
-.card{
-background:white;
-padding:15px;
-border-radius:8px;
-box-shadow:0 0 5px rgba(0,0,0,0.1);
-width:150px;
-text-align:center;
-}
-
-.result{
-margin-top:20px;
-padding:20px;
-border-radius:10px;
-font-size:20px;
-}
-
-.safe{
-background:#e6fff0;
-border:2px solid green;
-}
-
-.unsafe{
-background:#ffe6e6;
-border:2px solid red;
-}
-
-.alert{
-background:#fff5e6;
-border:2px solid orange;
-}
-
-</style>
+        p{
+            font-size:20px;
+            font-weight:bold;
+        }
+    </style>
 
 </head>
 
 <body>
 
-<h1>Water Quality Monitoring Dashboard</h1>
+<h1>IoT Water Quality Monitoring System</h1>
 
-<div class="sensor-box">
-
-<div class="card">
-pH
-<h3 id="ph">--</h3>
-</div>
+<div class="container">
 
 <div class="card">
-Turbidity
-<h3 id="turb">--</h3>
+<h2>pH</h2>
+<p id="ph">0</p>
 </div>
 
 <div class="card">
-Temperature
-<h3 id="temp">--</h3>
+<h2>Temperature</h2>
+<p id="temperature">0</p>
 </div>
 
 <div class="card">
-DO
-<h3 id="do">--</h3>
+<h2>Turbidity</h2>
+<p id="turbidity">0</p>
 </div>
 
 <div class="card">
-BOD
-<h3 id="bod">--</h3>
+<h2>TDS</h2>
+<p id="tds">0</p>
 </div>
 
 <div class="card">
-Water Level
-<h3 id="waterlevel">--</h3>
+<h2>Water Level</h2>
+<p id="water_level">0</p>
+</div>
+
+<div class="card">
+<h2>Flow</h2>
+<p id="flow">0</p>
 </div>
 
 </div>
-
-<div id="resultBox" class="result"></div>
-<div id="spikeBox" class="result alert"></div>
-<div id="predictionBox" class="result"></div>
-
-<br>
-
-<canvas id="chart" width="600" height="250"></canvas>
 
 <script>
 
-const ctx = document.getElementById("chart").getContext("2d")
+function updateData(){
 
-let chart = new Chart(ctx,{
-type:"line",
-data:{
-labels:[],
-datasets:[{
-label:"Turbidity",
-data:[],
-borderColor:"blue",
-fill:false
-}]
-},
-options:{animation:false}
+fetch("/sensor-data")
+.then(response => response.json())
+.then(data => {
+
+document.getElementById("ph").innerText = data.ph
+document.getElementById("temperature").innerText = data.temperature
+document.getElementById("turbidity").innerText = data.turbidity
+document.getElementById("tds").innerText = data.tds
+document.getElementById("water_level").innerText = data.water_level
+document.getElementById("flow").innerText = data.flow
+
 })
-
-function updateChart(value){
-
-const time = new Date().toLocaleTimeString()
-
-chart.data.labels.push(time)
-chart.data.datasets[0].data.push(value)
-
-if(chart.data.labels.length>10){
-chart.data.labels.shift()
-chart.data.datasets[0].data.shift()
-}
-
-chart.update()
+.catch(error => console.log(error))
 
 }
 
-setInterval(async()=>{
-
-const res = await fetch("/latest")
-const data = await res.json()
-
-if(!data.result) return
-
-document.getElementById("ph").textContent=data.ph
-document.getElementById("turb").textContent=data.turbidity
-document.getElementById("temp").textContent=data.temperature
-document.getElementById("do").textContent=data.do
-document.getElementById("bod").textContent=data.bod
-document.getElementById("waterlevel").textContent=data.waterlevel
-
-const resultBox=document.getElementById("resultBox")
-resultBox.textContent=data.result
-resultBox.className="result "+(data.result.includes("Unsafe")?"unsafe":"safe")
-
-document.getElementById("spikeBox").textContent=data.spike
-
-document.getElementById("predictionBox").textContent=
-"Predicted Turbidity: "+data.predicted_turbidity
-
-updateChart(data.turbidity)
-
-},2000)
+setInterval(updateData,1000)
 
 </script>
 
