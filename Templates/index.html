@@ -210,7 +210,11 @@ document.getElementById("waterlevel").textContent=data.waterlevel
 const resultBox=document.getElementById("resultBox")
 
 resultBox.textContent=data.result
-resultBox.className="result "+(data.result.includes("Unsafe")?"unsafe":"safe")
+if(data.result.includes("Unsafe") || data.result.includes("Drought")){
+    resultBox.className="result unsafe"
+}else{
+    resultBox.className="result safe"
+}
 
 document.getElementById("spikeBox").textContent=data.spike
 

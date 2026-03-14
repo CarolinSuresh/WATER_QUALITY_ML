@@ -30,6 +30,7 @@ def predict():
     bod = data["BOD (mg/L)"]
     waterlevel = data["WaterLevel"]
 
+    # ML FEATURES
     X = np.array([[ph, turbidity, temperature, do, bod]])
     X_scaled = scaler.transform(X)
 
@@ -40,12 +41,21 @@ def predict():
     lr_scaled = scaler_lr.transform(lr_input)
     predicted_turbidity = lr.predict(lr_scaled)[0]
 
+    # -------------------------------
+    # NORMAL ML RESULT
+    # -------------------------------
     result_text = "Water is Safe" if rf_pred == 0 else "Water is Unsafe"
     spike = "No sudden spike detected"
 
     if iso_pred == -1:
         result_text = "Water is Unsafe"
         spike = "Sudden spike detected!"
+
+    # -------------------------------
+    # DROUGHT CONDITION
+    # -------------------------------
+    if waterlevel == 0:
+        result_text = "Drought Predicted - No Water in Container"
 
     latest_result = {
         "ph": ph,

@@ -16,7 +16,6 @@ while True:
         if line:
             print("SERIAL:", line)
 
-        # -------- READ MACHINE DATA FROM RX --------
         if "MLDATA:" in line:
 
             data = line.split("MLDATA:")[1].strip()
@@ -27,10 +26,11 @@ while True:
                 ph = float(values[0])
                 turb = float(values[1])
                 temp = float(values[2])
-                do = float(values[3])   # MQ ammonia used as DO input
-                bod = float(values[4])  # TDS used as BOD input
+                do = float(values[3])
+                bod = float(values[4])
 
-                waterlevel = 0   # RX doesn't send WL in MLDATA
+                # water level default
+                waterlevel = 0
 
                 payload = {
                     "pH": ph,
