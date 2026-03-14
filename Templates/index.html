@@ -79,12 +79,12 @@ Temperature
 </div>
 
 <div class="card">
-DO
+MQ (Ammonia)
 <h3 id="do">--</h3>
 </div>
 
 <div class="card">
-BOD
+TDS
 <h3 id="bod">--</h3>
 </div>
 
@@ -101,7 +101,9 @@ Water Level
 
 <br>
 
-<canvas id="chart" width="600" height="250"></canvas>
+<h2>Sensor Analytics</h2>
+
+<canvas id="chart" width="900" height="350"></canvas>
 
 <script>
 
@@ -111,26 +113,80 @@ let chart = new Chart(ctx,{
 type:"line",
 data:{
 labels:[],
-datasets:[{
+datasets:[
+{
+label:"pH",
+data:[],
+borderColor:"green",
+fill:false
+},
+{
 label:"Turbidity",
 data:[],
 borderColor:"blue",
 fill:false
-}]
 },
-options:{animation:false}
+{
+label:"Temperature",
+data:[],
+borderColor:"red",
+fill:false
+},
+{
+label:"MQ (Ammonia)",
+data:[],
+borderColor:"orange",
+fill:false
+},
+{
+label:"TDS",
+data:[],
+borderColor:"purple",
+fill:false
+},
+{
+label:"Water Level",
+data:[],
+borderColor:"black",
+fill:false
+}
+]
+},
+options:{
+animation:false,
+responsive:true,
+scales:{
+x:{
+title:{display:true,text:"Time"}
+},
+y:{
+title:{display:true,text:"Sensor Values"}
+}
+}
+}
 })
 
-function updateChart(value){
+function updateChart(data){
 
 const time = new Date().toLocaleTimeString()
 
 chart.data.labels.push(time)
-chart.data.datasets[0].data.push(value)
 
-if(chart.data.labels.length>10){
+chart.data.datasets[0].data.push(data.ph)
+chart.data.datasets[1].data.push(data.turbidity)
+chart.data.datasets[2].data.push(data.temperature)
+chart.data.datasets[3].data.push(data.do)
+chart.data.datasets[4].data.push(data.bod)
+chart.data.datasets[5].data.push(data.waterlevel)
+
+if(chart.data.labels.length>15){
+
 chart.data.labels.shift()
-chart.data.datasets[0].data.shift()
+
+chart.data.datasets.forEach(dataset=>{
+dataset.data.shift()
+})
+
 }
 
 chart.update()
@@ -152,6 +208,7 @@ document.getElementById("bod").textContent=data.bod
 document.getElementById("waterlevel").textContent=data.waterlevel
 
 const resultBox=document.getElementById("resultBox")
+
 resultBox.textContent=data.result
 resultBox.className="result "+(data.result.includes("Unsafe")?"unsafe":"safe")
 
@@ -160,7 +217,7 @@ document.getElementById("spikeBox").textContent=data.spike
 document.getElementById("predictionBox").textContent=
 "Predicted Turbidity: "+data.predicted_turbidity
 
-updateChart(data.turbidity)
+updateChart(data)
 
 },2000)
 
