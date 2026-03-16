@@ -21,16 +21,15 @@ while True:
             data = line.split("MLDATA:")[1].strip()
             values = data.split(",")
 
-            if len(values) >= 5:
+            # Now expecting 6 values
+            if len(values) >= 6:
 
                 ph = float(values[0])
                 turb = float(values[1])
                 temp = float(values[2])
                 do = float(values[3])
                 bod = float(values[4])
-
-                # water level default
-                waterlevel = 0
+                waterlevel = float(values[5])   # <-- FIXED
 
                 payload = {
                     "pH": ph,
@@ -50,6 +49,9 @@ while True:
 
                 print("ML RESULT:", res.json())
                 print("---------------------------")
+
+            else:
+                print("⚠ Incomplete MLDATA:", values)
 
     except Exception as e:
         print("Error:", e)
