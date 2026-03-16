@@ -16,7 +16,6 @@ latest_result = {}
 def home():
     return render_template("index.html")
 
-
 @app.route('/predict', methods=['POST'])
 def predict():
 
@@ -24,20 +23,14 @@ def predict():
 
     data = request.json
 
-    # SENSOR VALUES
-    ph = data.get("pH",0)
-    turbidity = data.get("Turbidity (NTU)",0)
-    temperature = data.get("Temperature (°C)",0)
-    do = data.get("DO (mg/L)",0)
-    bod = data.get("BOD (mg/L)",0)
+    ph = data["pH"]
+    turbidity = data["Turbidity (NTU)"]
+    temperature = data["Temperature (°C)"]
+    do = data["DO (mg/L)"]
+    bod = data["BOD (mg/L)"]
+    waterlevel = data["WaterLevel"]
 
-    # WATER LEVEL FIX
-    waterlevel = data.get("WaterLevel", data.get("waterlevel", data.get("water_level",0)))
-
-    # -----------------------
-    # ML FEATURES
-    # -----------------------
-
+    # ---------------- ML FEATURES ----------------
     X = np.array([[ph, turbidity, temperature, do, bod]])
     X_scaled = scaler.transform(X)
 
@@ -48,23 +41,24 @@ def predict():
     lr_scaled = scaler_lr.transform(lr_input)
     predicted_turbidity = lr.predict(lr_scaled)[0]
 
-    # -----------------------
-    # NORMAL ML RESULT
-    # -----------------------
-
-    result_text = "Water is Safe" if rf_pred == 0 else "Water is Unsafe"
+    # ---------------- RESULT TEXT ----------------
+    result_text = "Good Water Quality"
     spike = "No sudden spike detected"
+    advice = "System operating normally"
+
+    if rf_pred == 1:
+        result_text = "Bad Water Quality"
+        advice = "Manual water quality inspection recommended"
 
     if iso_pred == -1:
-        result_text = "Water is Unsafe"
         spike = "Sudden spike detected!"
+        result_text = "Bad Water Quality"
+        advice = "Sensor anomaly detected. Manual inspection recommended."
 
-    # -----------------------
-    # DROUGHT CONDITION
-    # -----------------------
-
-    if waterlevel <= 0:
-        result_text = "Drought Predicted"
+    # ---------------- DROUGHT CHECK ----------------
+    if waterlevel <= 5:
+        result_text = "Drought Risk Detected"
+        advice = "Water level critically low. Manual check required."
 
     latest_result = {
         "ph": ph,
@@ -75,16 +69,15 @@ def predict():
         "waterlevel": waterlevel,
         "result": result_text,
         "spike": spike,
+        "advice": advice,
         "predicted_turbidity": round(float(predicted_turbidity),3)
     }
 
     return jsonify(latest_result)
 
-
 @app.route('/latest')
 def latest():
     return jsonify(latest_result)
-
 
 if __name__ == "__main__":
     app.run(debug=True)

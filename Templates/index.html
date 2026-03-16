@@ -61,6 +61,11 @@ border:2px solid orange;
 
 <h1>Water Quality Monitoring Dashboard</h1>
 
+<!-- Alarm sound -->
+<audio id="alarmSound">
+<source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+</audio>
+
 <div class="sensor-box">
 
 <div class="card">
@@ -98,6 +103,7 @@ Water Level
 <div id="resultBox" class="result"></div>
 <div id="spikeBox" class="result alert"></div>
 <div id="predictionBox" class="result"></div>
+<div id="adviceBox" class="result alert"></div>
 
 <br>
 
@@ -193,6 +199,8 @@ chart.update()
 
 }
 
+const alarm = document.getElementById("alarmSound")
+
 setInterval(async()=>{
 
 const res = await fetch("/latest")
@@ -210,8 +218,10 @@ document.getElementById("waterlevel").textContent=data.waterlevel
 const resultBox=document.getElementById("resultBox")
 
 resultBox.textContent=data.result
-if(data.result.includes("Unsafe") || data.result.includes("Drought")){
+
+if(data.result.includes("Bad") || data.result.includes("Drought")){
     resultBox.className="result unsafe"
+    alarm.play()
 }else{
     resultBox.className="result safe"
 }
@@ -220,6 +230,8 @@ document.getElementById("spikeBox").textContent=data.spike
 
 document.getElementById("predictionBox").textContent=
 "Predicted Turbidity: "+data.predicted_turbidity
+
+document.getElementById("adviceBox").textContent=data.advice
 
 updateChart(data)
 
