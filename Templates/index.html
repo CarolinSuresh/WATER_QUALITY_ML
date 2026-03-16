@@ -61,18 +61,16 @@ border:2px solid orange;
 
 <h1>Water Quality Monitoring Dashboard</h1>
 
-<audio id="alarmSound">
-<source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-</audio>
-
 <div class="sensor-box">
 
 <div class="card">pH<h3 id="ph">--</h3></div>
 <div class="card">Turbidity<h3 id="turb">--</h3></div>
 <div class="card">Temperature<h3 id="temp">--</h3></div>
-<div class="card">MQ (Ammonia)<h3 id="do">--</h3></div>
-<div class="card">TDS<h3 id="bod">--</h3></div>
+<div class="card">MQ (Ammonia)<h3 id="mq">--</h3></div>
+<div class="card">TDS<h3 id="tds">--</h3></div>
 <div class="card">Water Level<h3 id="waterlevel">--</h3></div>
+<div class="card">DO<h3 id="do">--</h3></div>
+<div class="card">BOD<h3 id="bod">--</h3></div>
 
 </div>
 
@@ -100,7 +98,9 @@ datasets:[
 {label:"Temperature",data:[],borderColor:"red"},
 {label:"MQ",data:[],borderColor:"orange"},
 {label:"TDS",data:[],borderColor:"purple"},
-{label:"Water Level",data:[],borderColor:"black"}
+{label:"Water Level",data:[],borderColor:"black"},
+{label:"DO",data:[],borderColor:"brown"},
+{label:"BOD",data:[],borderColor:"cyan"}
 ]
 },
 options:{animation:false}
@@ -118,6 +118,8 @@ chart.data.datasets[2].data.push(data.temperature)
 chart.data.datasets[3].data.push(data.do)
 chart.data.datasets[4].data.push(data.bod)
 chart.data.datasets[5].data.push(data.waterlevel)
+chart.data.datasets[6].data.push(data.do)
+chart.data.datasets[7].data.push(data.bod)
 
 if(chart.data.labels.length>15){
 
@@ -132,8 +134,6 @@ dataset.data.shift()
 chart.update()
 
 }
-
-const alarm = document.getElementById("alarmSound")
 
 setInterval(async()=>{
 
@@ -155,7 +155,6 @@ resultBox.textContent=data.result
 
 if(data.result.includes("Bad") || data.result.includes("Drought")){
 resultBox.className="result unsafe"
-alarm.play()
 }else{
 resultBox.className="result safe"
 }

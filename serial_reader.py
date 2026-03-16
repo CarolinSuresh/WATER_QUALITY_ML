@@ -26,21 +26,15 @@ while True:
                 ph = float(values[0])
                 turb = float(values[1])
                 temp = float(values[2])
-
-                # -------- AMMONIA CALIBRATION --------
-                raw_ammonia = float(values[3])
-                ammonia = max(0, raw_ammonia - 65)
-
+                mq = float(values[3])
                 tds = float(values[4])
                 waterlevel = float(values[5])
 
-                # -------- DERIVED ML FEATURES --------
+                # -------- DERIVED FEATURES --------
 
-                # Dissolved Oxygen approximation
                 do = max(5, 14.6 - 0.4 * temp)
 
-                # Biological Oxygen Demand approximation
-                bod = max(1, (ammonia / 10) + (turb / 8) + (tds / 150))
+                bod = max(1, (mq / 10) + (turb / 8) + (tds / 150))
 
                 payload = {
                     "pH": ph,
@@ -60,9 +54,6 @@ while True:
 
                 print("ML RESULT:", res.json())
                 print("---------------------------")
-
-            else:
-                print("⚠ Incomplete MLDATA:", values)
 
     except Exception as e:
         print("Error:", e)

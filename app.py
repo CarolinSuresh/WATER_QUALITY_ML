@@ -43,7 +43,9 @@ def predict():
         advice = "Manual water quality inspection recommended"
 
     if iso_pred == -1:
-        spike = "Sensor fluctuation detected"
+        spike = "Sudden spike detected!"
+        result_text = "Bad Water Quality"
+        advice = "Sensor anomaly detected. Manual inspection recommended."
 
     if waterlevel <= 5:
         result_text = "Drought Risk Detected"
