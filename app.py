@@ -16,6 +16,7 @@ latest_result = {}
 def home():
     return render_template("index.html")
 
+
 @app.route('/predict', methods=['POST'])
 def predict():
 
@@ -23,14 +24,20 @@ def predict():
 
     data = request.json
 
-    ph = data["pH"]
-    turbidity = data["Turbidity (NTU)"]
-    temperature = data["Temperature (°C)"]
-    do = data["DO (mg/L)"]
-    bod = data["BOD (mg/L)"]
-    waterlevel = data["WaterLevel"]
+    # SENSOR VALUES
+    ph = data.get("pH",0)
+    turbidity = data.get("Turbidity (NTU)",0)
+    temperature = data.get("Temperature (°C)",0)
+    do = data.get("DO (mg/L)",0)
+    bod = data.get("BOD (mg/L)",0)
 
+    # WATER LEVEL FIX
+    waterlevel = data.get("WaterLevel", data.get("waterlevel", data.get("water_level",0)))
+
+    # -----------------------
     # ML FEATURES
+    # -----------------------
+
     X = np.array([[ph, turbidity, temperature, do, bod]])
     X_scaled = scaler.transform(X)
 
@@ -41,9 +48,10 @@ def predict():
     lr_scaled = scaler_lr.transform(lr_input)
     predicted_turbidity = lr.predict(lr_scaled)[0]
 
-    # -------------------------------
+    # -----------------------
     # NORMAL ML RESULT
-    # -------------------------------
+    # -----------------------
+
     result_text = "Water is Safe" if rf_pred == 0 else "Water is Unsafe"
     spike = "No sudden spike detected"
 
@@ -51,11 +59,12 @@ def predict():
         result_text = "Water is Unsafe"
         spike = "Sudden spike detected!"
 
-    # -------------------------------
+    # -----------------------
     # DROUGHT CONDITION
-    # -------------------------------
-    if waterlevel == 0:
-        result_text = "Drought Predicted - No Water in Container"
+    # -----------------------
+
+    if waterlevel <= 0:
+        result_text = "Drought Predicted"
 
     latest_result = {
         "ph": ph,
@@ -71,9 +80,11 @@ def predict():
 
     return jsonify(latest_result)
 
+
 @app.route('/latest')
 def latest():
     return jsonify(latest_result)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
