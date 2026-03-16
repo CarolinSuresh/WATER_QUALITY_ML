@@ -67,41 +67,17 @@ border:2px solid orange;
 
 <div class="sensor-box">
 
-<div class="card">
-pH
-<h3 id="ph">--</h3>
-</div>
-
-<div class="card">
-Turbidity
-<h3 id="turb">--</h3>
-</div>
-
-<div class="card">
-Temperature
-<h3 id="temp">--</h3>
-</div>
-
-<div class="card">
-MQ (Ammonia)
-<h3 id="do">--</h3>
-</div>
-
-<div class="card">
-TDS
-<h3 id="bod">--</h3>
-</div>
-
-<div class="card">
-Water Level
-<h3 id="waterlevel">--</h3>
-</div>
+<div class="card">pH<h3 id="ph">--</h3></div>
+<div class="card">Turbidity<h3 id="turb">--</h3></div>
+<div class="card">Temperature<h3 id="temp">--</h3></div>
+<div class="card">MQ (Ammonia)<h3 id="do">--</h3></div>
+<div class="card">TDS<h3 id="bod">--</h3></div>
+<div class="card">Water Level<h3 id="waterlevel">--</h3></div>
 
 </div>
 
 <div id="resultBox" class="result"></div>
 <div id="spikeBox" class="result alert"></div>
-<div id="predictionBox" class="result"></div>
 <div id="adviceBox" class="result alert"></div>
 
 <br>
@@ -119,15 +95,15 @@ type:"line",
 data:{
 labels:[],
 datasets:[
-{label:"pH",data:[],borderColor:"green",fill:false},
-{label:"Turbidity",data:[],borderColor:"blue",fill:false},
-{label:"Temperature",data:[],borderColor:"red",fill:false},
-{label:"MQ (Ammonia)",data:[],borderColor:"orange",fill:false},
-{label:"TDS",data:[],borderColor:"purple",fill:false},
-{label:"Water Level",data:[],borderColor:"black",fill:false}
+{label:"pH",data:[],borderColor:"green"},
+{label:"Turbidity",data:[],borderColor:"blue"},
+{label:"Temperature",data:[],borderColor:"red"},
+{label:"MQ",data:[],borderColor:"orange"},
+{label:"TDS",data:[],borderColor:"purple"},
+{label:"Water Level",data:[],borderColor:"black"}
 ]
 },
-options:{animation:false,responsive:true}
+options:{animation:false}
 })
 
 function updateChart(data){
@@ -185,7 +161,6 @@ resultBox.className="result safe"
 }
 
 document.getElementById("spikeBox").textContent=data.spike
-document.getElementById("predictionBox").textContent="Predicted Turbidity: "+data.predicted_turbidity
 document.getElementById("adviceBox").textContent=data.advice
 
 updateChart(data)

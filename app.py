@@ -6,9 +6,7 @@ app = Flask(__name__)
 
 rf = joblib.load('rf_classifier.pkl')
 iso = joblib.load('isolation_forest.pkl')
-lr = joblib.load('linear_regression_turbidity.pkl')
 scaler = joblib.load('scaler_features.pkl')
-scaler_lr = joblib.load('scaler_lr.pkl')
 
 latest_result = {}
 
@@ -36,10 +34,6 @@ def predict():
     rf_pred = rf.predict(X_scaled)[0]
     iso_pred = iso.predict(X_scaled)[0]
 
-    lr_input = np.array([[ph, temperature, do, bod]])
-    lr_scaled = scaler_lr.transform(lr_input)
-    predicted_turbidity = lr.predict(lr_scaled)[0]
-
     result_text = "Good Water Quality"
     spike = "No sudden spike detected"
     advice = "System operating normally"
@@ -48,16 +42,9 @@ def predict():
         result_text = "Bad Water Quality"
         advice = "Manual water quality inspection recommended"
 
-    # Only treat anomaly as unsafe if values are actually abnormal
     if iso_pred == -1:
+        spike = "Sensor fluctuation detected"
 
-        if turbidity > 5 or ph < 6 or ph > 9 or bod > 6 or do < 3:
-            spike = "Sudden spike detected!"
-            result_text = "Bad Water Quality"
-            advice = "Sensor anomaly detected. Manual inspection recommended."
-        else:
-            spike = "Minor sensor fluctuation detected"
-            
     if waterlevel <= 5:
         result_text = "Drought Risk Detected"
         advice = "Water level critically low. Manual check required."
@@ -71,8 +58,7 @@ def predict():
         "waterlevel": waterlevel,
         "result": result_text,
         "spike": spike,
-        "advice": advice,
-        "predicted_turbidity": round(float(predicted_turbidity),3)
+        "advice": advice
     }
 
     return jsonify(latest_result)
