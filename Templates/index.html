@@ -61,7 +61,6 @@ border:2px solid orange;
 
 <h1>Water Quality Monitoring Dashboard</h1>
 
-<!-- Alarm sound -->
 <audio id="alarmSound">
 <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
 </audio>
@@ -120,56 +119,15 @@ type:"line",
 data:{
 labels:[],
 datasets:[
-{
-label:"pH",
-data:[],
-borderColor:"green",
-fill:false
-},
-{
-label:"Turbidity",
-data:[],
-borderColor:"blue",
-fill:false
-},
-{
-label:"Temperature",
-data:[],
-borderColor:"red",
-fill:false
-},
-{
-label:"MQ (Ammonia)",
-data:[],
-borderColor:"orange",
-fill:false
-},
-{
-label:"TDS",
-data:[],
-borderColor:"purple",
-fill:false
-},
-{
-label:"Water Level",
-data:[],
-borderColor:"black",
-fill:false
-}
+{label:"pH",data:[],borderColor:"green",fill:false},
+{label:"Turbidity",data:[],borderColor:"blue",fill:false},
+{label:"Temperature",data:[],borderColor:"red",fill:false},
+{label:"MQ (Ammonia)",data:[],borderColor:"orange",fill:false},
+{label:"TDS",data:[],borderColor:"purple",fill:false},
+{label:"Water Level",data:[],borderColor:"black",fill:false}
 ]
 },
-options:{
-animation:false,
-responsive:true,
-scales:{
-x:{
-title:{display:true,text:"Time"}
-},
-y:{
-title:{display:true,text:"Sensor Values"}
-}
-}
-}
+options:{animation:false,responsive:true}
 })
 
 function updateChart(data){
@@ -208,11 +166,11 @@ const data = await res.json()
 
 if(!data.ph) return
 
-document.getElementById("ph").textContent=data.ph
+document.getElementById("ph").textContent=data.ph.toFixed(2)
 document.getElementById("turb").textContent=data.turbidity
-document.getElementById("temp").textContent=data.temperature
-document.getElementById("do").textContent=data.do
-document.getElementById("bod").textContent=data.bod
+document.getElementById("temp").textContent=data.temperature.toFixed(2)
+document.getElementById("do").textContent=data.do.toFixed(2)
+document.getElementById("bod").textContent=data.bod.toFixed(2)
 document.getElementById("waterlevel").textContent=data.waterlevel
 
 const resultBox=document.getElementById("resultBox")
@@ -220,17 +178,14 @@ const resultBox=document.getElementById("resultBox")
 resultBox.textContent=data.result
 
 if(data.result.includes("Bad") || data.result.includes("Drought")){
-    resultBox.className="result unsafe"
-    alarm.play()
+resultBox.className="result unsafe"
+alarm.play()
 }else{
-    resultBox.className="result safe"
+resultBox.className="result safe"
 }
 
 document.getElementById("spikeBox").textContent=data.spike
-
-document.getElementById("predictionBox").textContent=
-"Predicted Turbidity: "+data.predicted_turbidity
-
+document.getElementById("predictionBox").textContent="Predicted Turbidity: "+data.predicted_turbidity
 document.getElementById("adviceBox").textContent=data.advice
 
 updateChart(data)

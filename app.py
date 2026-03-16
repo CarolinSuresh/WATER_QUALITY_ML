@@ -30,7 +30,6 @@ def predict():
     bod = data["BOD (mg/L)"]
     waterlevel = data["WaterLevel"]
 
-    # ---------------- ML FEATURES ----------------
     X = np.array([[ph, turbidity, temperature, do, bod]])
     X_scaled = scaler.transform(X)
 
@@ -41,7 +40,6 @@ def predict():
     lr_scaled = scaler_lr.transform(lr_input)
     predicted_turbidity = lr.predict(lr_scaled)[0]
 
-    # ---------------- RESULT TEXT ----------------
     result_text = "Good Water Quality"
     spike = "No sudden spike detected"
     advice = "System operating normally"
@@ -55,7 +53,6 @@ def predict():
         result_text = "Bad Water Quality"
         advice = "Sensor anomaly detected. Manual inspection recommended."
 
-    # ---------------- DROUGHT CHECK ----------------
     if waterlevel <= 5:
         result_text = "Drought Risk Detected"
         advice = "Water level critically low. Manual check required."
@@ -64,8 +61,8 @@ def predict():
         "ph": ph,
         "turbidity": turbidity,
         "temperature": temperature,
-        "do": do,
-        "bod": bod,
+        "do": round(do,2),
+        "bod": round(bod,2),
         "waterlevel": waterlevel,
         "result": result_text,
         "spike": spike,

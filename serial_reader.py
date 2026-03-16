@@ -29,8 +29,6 @@ while True:
 
                 # -------- AMMONIA CALIBRATION --------
                 raw_ammonia = float(values[3])
-
-                # 60-70 ppm considered baseline
                 ammonia = max(0, raw_ammonia - 65)
 
                 tds = float(values[4])
@@ -38,11 +36,11 @@ while True:
 
                 # -------- DERIVED ML FEATURES --------
 
-                # approximate dissolved oxygen from temperature
-                do = max(0, 14.6 - 0.4 * temp)
+                # Dissolved Oxygen approximation
+                do = max(5, 14.6 - 0.4 * temp)
 
-                # approximate BOD from pollution indicators
-                bod = (ammonia / 20) + (turb / 10) + (tds / 200)
+                # Biological Oxygen Demand approximation
+                bod = max(1, (ammonia / 10) + (turb / 8) + (tds / 150))
 
                 payload = {
                     "pH": ph,
