@@ -4,7 +4,6 @@
 <head>
 
 <title>Water Quality Monitoring</title>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -78,8 +77,6 @@ border:2px solid orange;
 <div id="spikeBox" class="result alert"></div>
 <div id="adviceBox" class="result alert"></div>
 
-<br>
-
 <h2>Sensor Analytics</h2>
 
 <canvas id="chart" width="900" height="350"></canvas>
@@ -115,8 +112,8 @@ chart.data.labels.push(time)
 chart.data.datasets[0].data.push(data.ph)
 chart.data.datasets[1].data.push(data.turbidity)
 chart.data.datasets[2].data.push(data.temperature)
-chart.data.datasets[3].data.push(data.do)
-chart.data.datasets[4].data.push(data.bod)
+chart.data.datasets[3].data.push(data.mq)
+chart.data.datasets[4].data.push(data.tds)
 chart.data.datasets[5].data.push(data.waterlevel)
 chart.data.datasets[6].data.push(data.do)
 chart.data.datasets[7].data.push(data.bod)
@@ -145,9 +142,11 @@ if(!data.ph) return
 document.getElementById("ph").textContent=data.ph.toFixed(2)
 document.getElementById("turb").textContent=data.turbidity
 document.getElementById("temp").textContent=data.temperature.toFixed(2)
+document.getElementById("mq").textContent=data.mq.toFixed(2)
+document.getElementById("tds").textContent=data.tds.toFixed(2)
+document.getElementById("waterlevel").textContent=data.waterlevel
 document.getElementById("do").textContent=data.do.toFixed(2)
 document.getElementById("bod").textContent=data.bod.toFixed(2)
-document.getElementById("waterlevel").textContent=data.waterlevel
 
 const resultBox=document.getElementById("resultBox")
 
