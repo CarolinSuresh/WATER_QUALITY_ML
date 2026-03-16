@@ -21,15 +21,28 @@ while True:
             data = line.split("MLDATA:")[1].strip()
             values = data.split(",")
 
-            # Now expecting 6 values
             if len(values) >= 6:
 
                 ph = float(values[0])
                 turb = float(values[1])
                 temp = float(values[2])
-                do = float(values[3])
-                bod = float(values[4])
-                waterlevel = float(values[5])   # <-- FIXED
+
+                # -------- AMMONIA CALIBRATION --------
+                raw_ammonia = float(values[3])
+
+                # 60-70 ppm considered baseline
+                ammonia = max(0, raw_ammonia - 65)
+
+                tds = float(values[4])
+                waterlevel = float(values[5])
+
+                # -------- DERIVED ML FEATURES --------
+
+                # approximate dissolved oxygen from temperature
+                do = max(0, 14.6 - 0.4 * temp)
+
+                # approximate BOD from pollution indicators
+                bod = (ammonia / 20) + (turb / 10) + (tds / 200)
 
                 payload = {
                     "pH": ph,
