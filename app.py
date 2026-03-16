@@ -48,11 +48,16 @@ def predict():
         result_text = "Bad Water Quality"
         advice = "Manual water quality inspection recommended"
 
+    # Only treat anomaly as unsafe if values are actually abnormal
     if iso_pred == -1:
-        spike = "Sudden spike detected!"
-        result_text = "Bad Water Quality"
-        advice = "Sensor anomaly detected. Manual inspection recommended."
 
+        if turbidity > 5 or ph < 6 or ph > 9 or bod > 6 or do < 3:
+            spike = "Sudden spike detected!"
+            result_text = "Bad Water Quality"
+            advice = "Sensor anomaly detected. Manual inspection recommended."
+        else:
+            spike = "Minor sensor fluctuation detected"
+            
     if waterlevel <= 5:
         result_text = "Drought Risk Detected"
         advice = "Water level critically low. Manual check required."
