@@ -112,11 +112,12 @@ const time = new Date().toLocaleTimeString()
 
 chart.data.labels.push(time)
 
+// ✅ FIXED MAPPING (IMPORTANT)
 chart.data.datasets[0].data.push(data.ph)
 chart.data.datasets[1].data.push(data.turbidity)
 chart.data.datasets[2].data.push(data.temperature)
-chart.data.datasets[3].data.push(data.do)
-chart.data.datasets[4].data.push(data.bod)
+chart.data.datasets[3].data.push(data.mq)          // FIXED
+chart.data.datasets[4].data.push(data.tds)         // FIXED
 chart.data.datasets[5].data.push(data.waterlevel)
 chart.data.datasets[6].data.push(data.do)
 chart.data.datasets[7].data.push(data.bod)
@@ -148,6 +149,10 @@ document.getElementById("temp").textContent=data.temperature.toFixed(2)
 document.getElementById("do").textContent=data.do.toFixed(2)
 document.getElementById("bod").textContent=data.bod.toFixed(2)
 document.getElementById("waterlevel").textContent=data.waterlevel
+
+// ✅ NEW (ONLY ADDITION)
+document.getElementById("mq").textContent=data.mq.toFixed(2)
+document.getElementById("tds").textContent=data.tds.toFixed(2)
 
 const resultBox=document.getElementById("resultBox")
 

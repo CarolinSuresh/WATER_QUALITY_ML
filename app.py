@@ -28,6 +28,10 @@ def predict():
     bod = data["BOD (mg/L)"]
     waterlevel = data["WaterLevel"]
 
+    # NEW PARAMETERS
+    mq = data["Ammonia (MQ)"]
+    tds = data["TDS (ppm)"]
+
     X = np.array([[ph, turbidity, temperature, do, bod]])
     X_scaled = scaler.transform(X)
 
@@ -55,9 +59,11 @@ def predict():
         "ph": ph,
         "turbidity": turbidity,
         "temperature": temperature,
-        "do": round(do,2),
-        "bod": round(bod,2),
+        "do": round(do, 2),
+        "bod": round(bod, 2),
         "waterlevel": waterlevel,
+        "mq": mq,
+        "tds": tds,
         "result": result_text,
         "spike": spike,
         "advice": advice

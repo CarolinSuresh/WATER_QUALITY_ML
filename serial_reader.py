@@ -26,12 +26,11 @@ while True:
                 ph = float(values[0])
                 turb = float(values[1])
                 temp = float(values[2])
-                mq = float(values[3])
-                tds = float(values[4])
+                mq = float(values[3])      # Ammonia
+                tds = float(values[4])     # TDS
                 waterlevel = float(values[5])
 
                 # -------- DERIVED FEATURES --------
-
                 do = max(5, 14.6 - 0.4 * temp)
 
                 bod = max(1, (mq / 10) + (turb / 8) + (tds / 150))
@@ -42,7 +41,9 @@ while True:
                     "Temperature (°C)": temp,
                     "DO (mg/L)": do,
                     "BOD (mg/L)": bod,
-                    "WaterLevel": waterlevel
+                    "WaterLevel": waterlevel,
+                    "Ammonia (MQ)": mq,
+                    "TDS (ppm)": tds
                 }
 
                 print("Sending to ML:", payload)
