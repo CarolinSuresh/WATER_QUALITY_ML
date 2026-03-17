@@ -9,10 +9,31 @@ iso = joblib.load('isolation_forest.pkl')
 scaler = joblib.load('scaler_features.pkl')
 
 latest_result = {}
+previous_values = None   # ✅ ADDED
 
 @app.route('/')
 def home():
     return render_template("index.html")
+
+# ✅ SPIKE FUNCTION
+def detect_spike(current):
+    global previous_values
+
+    thresholds = [0.5, 20, 2, 50, 5, 50]  
+    # pH, turbidity, temp, mq, wl, tds
+
+    if previous_values is None:
+        previous_values = current
+        return False
+
+    for i in range(len(current)):
+        if abs(current[i] - previous_values[i]) > thresholds[i]:
+            previous_values = current
+            return True
+
+    previous_values = current
+    return False
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -37,20 +58,17 @@ def predict():
     rf_pred = rf.predict(X_scaled)[0]
     iso_pred = iso.predict(X_scaled)[0]
 
-    # -------- FINAL DECISION LOGIC --------
-
+    # -------- DEFAULT --------
     result_text = "Good Water Quality"
     advice = "System operating normally"
     spike = "No sudden spike detected"
-
-    contamination_note = ""   # 🔥 NEW
+    contamination_note = ""
 
     # -------- RULE-BASED DECISION --------
     if bod > 5 or do < 4:
         result_text = "Bad Water Quality"
         advice = "High pollution detected. Check water source."
 
-        # 🔥 ADD CONTAMINATION INSIGHT
         if bod > 6 or turbidity > 100:
             contamination_note = "⚠️ High possibility of E. coli or sewage contamination due to organic pollution."
 
@@ -58,15 +76,24 @@ def predict():
         result_text = "Moderate Water Quality"
         advice = "Water quality slightly degraded."
 
-    # -------- ML ANOMALY (ONLY WARNING) --------
-    if iso_pred == -1:
-        spike = "Sudden spike detected!"
-        advice += " Possible sensor anomaly."
-
     # -------- DROUGHT --------
     if waterlevel <= 5:
         result_text = "Drought Risk Detected"
         advice = "Water level critically low."
+
+    # -------- SPIKE DETECTION (FIXED) --------
+    current_values = [ph, turbidity, temperature, mq, waterlevel, tds]
+
+    spike_detected = detect_spike(current_values)
+
+    # ❗ Only show spike in NORMAL condition
+    if spike_detected and result_text == "Good Water Quality":
+        spike = "Sudden spike detected!"
+        advice += " Sudden parameter variation observed."
+
+    # ❗ DO NOT show spike in drought or bad quality
+    if result_text in ["Bad Water Quality", "Drought Risk Detected"]:
+        spike = "No sudden spike detected"
 
     # -------- FINAL OUTPUT --------
     latest_result = {
@@ -81,14 +108,16 @@ def predict():
         "result": result_text,
         "spike": spike,
         "advice": advice,
-        "contamination": contamination_note   # 🔥 NEW FIELD
+        "contamination": contamination_note
     }
 
     return jsonify(latest_result)
 
+
 @app.route('/latest')
 def latest():
     return jsonify(latest_result)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
