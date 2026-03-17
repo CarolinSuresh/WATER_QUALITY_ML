@@ -30,31 +30,34 @@ def predict():
     mq = data["Ammonia (MQ)"]
     tds = data["TDS (ppm)"]
 
+    # ML input
     X = np.array([[ph, turbidity, temperature, do, bod]])
     X_scaled = scaler.transform(X)
 
     rf_pred = rf.predict(X_scaled)[0]
     iso_pred = iso.predict(X_scaled)[0]
 
+    # -------- FINAL DECISION LOGIC --------
+
     result_text = "Good Water Quality"
-    spike = "No sudden spike detected"
     advice = "System operating normally"
+    spike = "No sudden spike detected"
 
-    # -------- IMPROVED LOGIC --------
-
+    # Rule-based decision (PRIMARY)
     if bod > 5 or do < 4:
         result_text = "Bad Water Quality"
         advice = "High pollution detected. Check water source."
 
-    if bod > 3 and bod <= 5:
+    elif 3 < bod <= 5:
         result_text = "Moderate Water Quality"
         advice = "Water quality slightly degraded."
 
+    # ML anomaly (ONLY WARNING)
     if iso_pred == -1:
         spike = "Sudden spike detected!"
-        result_text = "Bad Water Quality"
-        advice = "Sensor anomaly detected."
+        advice += " Possible sensor anomaly."
 
+    # Drought override
     if waterlevel <= 5:
         result_text = "Drought Risk Detected"
         advice = "Water level critically low."

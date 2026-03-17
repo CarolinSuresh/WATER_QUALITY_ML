@@ -26,21 +26,21 @@ while True:
                 ph = float(values[0])
                 turb = float(values[1])
                 temp = float(values[2])
-                mq = float(values[3])      
-                tds = float(values[4])     
+                mq = float(values[3])
+                tds = float(values[4])
                 waterlevel = float(values[5])
 
-                # -------- FIX 1: NORMALIZE MQ --------
+                # -------- NORMALIZE MQ (60–80 baseline) --------
                 mq_effective = max(0, mq - 60)
 
-                # -------- FIX 2: HANDLE TDS --------
+                # -------- FIX TDS --------
                 if tds == 0:
-                    tds = 100   # default realistic value
+                    tds = 100
 
-                # -------- FIX 3: UPDATED DO --------
+                # -------- UPDATED DO --------
                 do = 14.6 - 0.35 * temp
 
-                # -------- FIX 4: UPDATED BOD --------
+                # -------- UPDATED BOD --------
                 bod = (mq_effective / 15) + (turb / 10) + (tds / 200)
 
                 payload = {
