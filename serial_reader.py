@@ -26,14 +26,22 @@ while True:
                 ph = float(values[0])
                 turb = float(values[1])
                 temp = float(values[2])
-                mq = float(values[3])      # Ammonia
-                tds = float(values[4])     # TDS
+                mq = float(values[3])      
+                tds = float(values[4])     
                 waterlevel = float(values[5])
 
-                # -------- DERIVED FEATURES --------
-                do = max(5, 14.6 - 0.4 * temp)
+                # -------- FIX 1: NORMALIZE MQ --------
+                mq_effective = max(0, mq - 60)
 
-                bod = max(1, (mq / 10) + (turb / 8) + (tds / 150))
+                # -------- FIX 2: HANDLE TDS --------
+                if tds == 0:
+                    tds = 100   # default realistic value
+
+                # -------- FIX 3: UPDATED DO --------
+                do = 14.6 - 0.35 * temp
+
+                # -------- FIX 4: UPDATED BOD --------
+                bod = (mq_effective / 15) + (turb / 10) + (tds / 200)
 
                 payload = {
                     "pH": ph,

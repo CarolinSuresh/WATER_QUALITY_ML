@@ -27,8 +27,6 @@ def predict():
     do = data["DO (mg/L)"]
     bod = data["BOD (mg/L)"]
     waterlevel = data["WaterLevel"]
-
-    # NEW PARAMETERS
     mq = data["Ammonia (MQ)"]
     tds = data["TDS (ppm)"]
 
@@ -42,18 +40,24 @@ def predict():
     spike = "No sudden spike detected"
     advice = "System operating normally"
 
-    if rf_pred == 1:
+    # -------- IMPROVED LOGIC --------
+
+    if bod > 5 or do < 4:
         result_text = "Bad Water Quality"
-        advice = "Manual water quality inspection recommended"
+        advice = "High pollution detected. Check water source."
+
+    if bod > 3 and bod <= 5:
+        result_text = "Moderate Water Quality"
+        advice = "Water quality slightly degraded."
 
     if iso_pred == -1:
         spike = "Sudden spike detected!"
         result_text = "Bad Water Quality"
-        advice = "Sensor anomaly detected. Manual inspection recommended."
+        advice = "Sensor anomaly detected."
 
     if waterlevel <= 5:
         result_text = "Drought Risk Detected"
-        advice = "Water level critically low. Manual check required."
+        advice = "Water level critically low."
 
     latest_result = {
         "ph": ph,
