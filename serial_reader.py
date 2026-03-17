@@ -30,16 +30,16 @@ while True:
                 tds = float(values[4])
                 waterlevel = float(values[5])
 
-                # Derived parameters
+                # -------- DERIVED FEATURES --------
+
                 do = max(5, 14.6 - 0.4 * temp)
+
                 bod = max(1, (mq / 10) + (turb / 8) + (tds / 150))
 
                 payload = {
                     "pH": ph,
                     "Turbidity (NTU)": turb,
                     "Temperature (°C)": temp,
-                    "MQ": mq,
-                    "TDS": tds,
                     "DO (mg/L)": do,
                     "BOD (mg/L)": bod,
                     "WaterLevel": waterlevel

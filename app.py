@@ -1,59 +1,73 @@
-import serial
-import requests
+from flask import Flask, render_template, request, jsonify
+import joblib
+import numpy as np
 
-PORT = "COM5"
-BAUD = 115200
+app = Flask(__name__)
 
-ser = serial.Serial(PORT, BAUD, timeout=1)
+rf = joblib.load('rf_classifier.pkl')
+iso = joblib.load('isolation_forest.pkl')
+scaler = joblib.load('scaler_features.pkl')
 
-print("Reading LoRa data...\n")
+latest_result = {}
 
-while True:
+@app.route('/')
+def home():
+    return render_template("index.html")
 
-    try:
-        line = ser.readline().decode(errors='ignore').strip()
+@app.route('/predict', methods=['POST'])
+def predict():
 
-        if line:
-            print("SERIAL:", line)
+    global latest_result
 
-        if "MLDATA:" in line:
+    data = request.json
 
-            data = line.split("MLDATA:")[1].strip()
-            values = data.split(",")
+    ph = data["pH"]
+    turbidity = data["Turbidity (NTU)"]
+    temperature = data["Temperature (°C)"]
+    do = data["DO (mg/L)"]
+    bod = data["BOD (mg/L)"]
+    waterlevel = data["WaterLevel"]
 
-            if len(values) >= 6:
+    X = np.array([[ph, turbidity, temperature, do, bod]])
+    X_scaled = scaler.transform(X)
 
-                ph = float(values[0])
-                turb = float(values[1])
-                temp = float(values[2])
-                mq = float(values[3])
-                tds = float(values[4])
-                waterlevel = float(values[5])
+    rf_pred = rf.predict(X_scaled)[0]
+    iso_pred = iso.predict(X_scaled)[0]
 
-                # Derived parameters
-                do = max(5, 14.6 - 0.4 * temp)
-                bod = max(1, (mq / 10) + (turb / 8) + (tds / 150))
+    result_text = "Good Water Quality"
+    spike = "No sudden spike detected"
+    advice = "System operating normally"
 
-                payload = {
-                    "pH": ph,
-                    "Turbidity (NTU)": turb,
-                    "Temperature (°C)": temp,
-                    "MQ": mq,
-                    "TDS": tds,
-                    "DO (mg/L)": do,
-                    "BOD (mg/L)": bod,
-                    "WaterLevel": waterlevel
-                }
+    if rf_pred == 1:
+        result_text = "Bad Water Quality"
+        advice = "Manual water quality inspection recommended"
 
-                print("Sending to ML:", payload)
+    if iso_pred == -1:
+        spike = "Sudden spike detected!"
+        result_text = "Bad Water Quality"
+        advice = "Sensor anomaly detected. Manual inspection recommended."
 
-                res = requests.post(
-                    "http://127.0.0.1:5000/predict",
-                    json=payload
-                )
+    if waterlevel <= 5:
+        result_text = "Drought Risk Detected"
+        advice = "Water level critically low. Manual check required."
 
-                print("ML RESULT:", res.json())
-                print("---------------------------")
+    latest_result = {
+        "ph": ph,
+        "turbidity": turbidity,
+        "temperature": temperature,
+        "do": round(do,2),
+        "bod": round(bod,2),
+        "waterlevel": waterlevel,
+        "result": result_text,
+        "spike": spike,
+        "advice": advice
+    }
 
-    except Exception as e:
-        print("Error:", e)
+    return jsonify(latest_result)
+
+@app.route('/latest')
+def latest():
+    return jsonify(latest_result)
+
+if __name__ == "__main__":
+    app.run(debug=True)
