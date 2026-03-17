@@ -43,25 +43,32 @@ def predict():
     advice = "System operating normally"
     spike = "No sudden spike detected"
 
-    # Rule-based decision (PRIMARY)
+    contamination_note = ""   # 🔥 NEW
+
+    # -------- RULE-BASED DECISION --------
     if bod > 5 or do < 4:
         result_text = "Bad Water Quality"
         advice = "High pollution detected. Check water source."
+
+        # 🔥 ADD CONTAMINATION INSIGHT
+        if bod > 6 or turbidity > 100:
+            contamination_note = "⚠️ High possibility of E. coli or sewage contamination due to organic pollution."
 
     elif 3 < bod <= 5:
         result_text = "Moderate Water Quality"
         advice = "Water quality slightly degraded."
 
-    # ML anomaly (ONLY WARNING)
+    # -------- ML ANOMALY (ONLY WARNING) --------
     if iso_pred == -1:
         spike = "Sudden spike detected!"
         advice += " Possible sensor anomaly."
 
-    # Drought override
+    # -------- DROUGHT --------
     if waterlevel <= 5:
         result_text = "Drought Risk Detected"
         advice = "Water level critically low."
 
+    # -------- FINAL OUTPUT --------
     latest_result = {
         "ph": ph,
         "turbidity": turbidity,
@@ -73,7 +80,8 @@ def predict():
         "tds": tds,
         "result": result_text,
         "spike": spike,
-        "advice": advice
+        "advice": advice,
+        "contamination": contamination_note   # 🔥 NEW FIELD
     }
 
     return jsonify(latest_result)
