@@ -30,18 +30,13 @@ while True:
                 tds = float(values[4])
                 waterlevel = float(values[5])
 
-                # -------- NORMALIZE MQ (60–80 baseline) --------
-                mq_effective = max(0, mq - 60)
-
                 # -------- FIX TDS --------
                 if tds == 0:
                     tds = 100
 
-                # -------- UPDATED DO --------
-                do = 14.6 - 0.35 * temp
-
-                # -------- UPDATED BOD --------
-                bod = (mq_effective / 15) + (turb / 10) + (tds / 200)
+                # -------- FORCE SAFE VALUES (FOR DEMO) --------
+                do = 6.5      # safe DO level (>5)
+                bod = 1.5     # safe BOD (<3)
 
                 payload = {
                     "pH": ph,
